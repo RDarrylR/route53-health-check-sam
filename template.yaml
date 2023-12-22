@@ -26,7 +26,7 @@ Parameters:
     Default: www.amazon.com
   SlackWebhookURL:
     Type: String
-    Description: URL to publish slack messages to when health check changes state
+    Description: URL to publish slack messages to when health check changes state (NOTE Below is a fake URL - need to change it)
     Default: https://hooks.slack.com/triggers/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
 
 Resources:
