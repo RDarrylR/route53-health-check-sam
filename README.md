@@ -33,4 +33,4 @@ sam delete
 
 ### Read More
 
-This repository is associated with the following blog [posted here](https://darryl-ruggles.cloud/preview/655cb4d2033e7b0010677e5e/q
+This repository is associated with the following blog [posted here](https://darryl-ruggles.cloud/serverless-site-health-check-notification-system)
