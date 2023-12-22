@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  route53-health-check-sam
+
+  SAM Template for route53-health-check-sam
+    - Route53 Health Check
+    - Health Check Cloudwatch Alarm
+    - Lambda Function to run when alarm state changes
+    - SNS Topic to send updates on health check changes to
+
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+    Tracing: Active
+    LoggingConfig:
+      LogFormat: JSON
+  Api:
+    TracingEnabled: true
+
+Parameters:
+  Hostname:
+    Type: String
+    Description: Hostname to monitor   
+    Default: www.amazon.com
+  SlackWebhookURL:
+    Type: String
+    Description: URL to publish slack messages to when health check changes state
+    Default: https://hooks.slack.com/triggers/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
+
+Resources:
+  HealthCheckStateChangedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: site_health_check/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - x86_64      
+      Policies:          
+        - SNSPublishMessagePolicy: 
+            TopicName: !GetAtt Route53HealthCheckSNSTopic.TopicName
+      Environment:
+        Variables:
+          SNS_TOPIC_ARN: !Ref Route53HealthCheckSNSTopic
+          SLACK_WEBHOOK_URL: !Ref SlackWebhookURL
+      Events:
+        Trigger:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.cloudwatch
+              detail-type:
+                - CloudWatch Alarm State Change
+              detail:
+                alarmName:
+                  - wildcard: "*-HealthCheckAlarm"
+
+  Route53HealthCheckSNSTopic:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      DisplayName: "Route53 Health Check SNS Topic"
+      Subscription:  
+        - Endpoint: healthcheck_status@example.com
+          Protocol: email          
+      TopicName: "Route53HealthCheckSNSTopic"
+
+  Route53HealthCheck: 
+    Type: 'AWS::Route53::HealthCheck'
+    Properties: 
+      
+      HealthCheckConfig: 
+        Port: 443
+        Type: HTTPS
+        ResourcePath: '/'
+        FullyQualifiedDomainName: !Ref Hostname
+        RequestInterval: 30
+        FailureThreshold: 3    
+
+  Route53HealthCheckAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Health Check Alarm
+      AlarmName: !Join
+        - ''
+        - - !Ref Hostname
+          - '-HealthCheckAlarm'
+      Namespace: AWS/Route53
+      MetricName: HealthCheckStatus
+      Dimensions:
+        - Name: HealthCheckId
+          Value: !Ref Route53HealthCheck
+      ComparisonOperator: LessThanThreshold
+      EvaluationPeriods: 1
+      Period: 30
+      Statistic: Minimum
+      Threshold: 1.0
+      TreatMissingData: breaching              
