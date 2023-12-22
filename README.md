@@ -16,7 +16,7 @@ Example SAM project to setup a Route53 health check monitoring solution to watch
 
 ### Deploy the sample project
 
-To deploy the projecy, you need the following tools:
+To deploy the project, you need the following tools:
 
 ```bash
  sam build
