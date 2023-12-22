@@ -1,7 +1,7 @@
 # Route53 Health Check SAM
 
 ### Purpose
-
+Example SAM project to setup a Route53 health check monitoring solution to watch a host becoming reachable/unreachable and notifying interested parties using SNS and Slack
 
 ### Key Files
 
@@ -11,7 +11,8 @@
 
 ### Requirements
 
--   [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+-   [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html) (NOTE the latest version may be needed if you see errors about "LoggingConfig" or other items)
+-   Python 3.12 available to the sam cli. You will get errors about Python 3.12 not being found if you don't have it
 
 ### Deploy the sample project
 
